@@ -1,0 +1,50 @@
+{
+  "law_title": "Luật Đầu tư theo phương thức đối tác công tư",
+  "law_id": "61-2020-QH14",
+  "chapters": [
+    {
+      "chapter_title": "Những quy định chung",
+      "chapter_seq": 1,
+      "branch_path": "chapter-1",
+      "articles": [
+        {
+          "article_no": 1,
+          "article_heading": "Phạm vi điều chỉnh",
+          "article_text": "<p>Luật này quy định về đầu tư theo phương thức đối tác công tư; quyền và nghĩa vụ của các bên tham gia dự án đầu tư theo phương thức đối tác công tư; quản lý nhà nước về đầu tư theo phương thức đối tác công tư.</p>",
+          "annotations": [{"type":"note","text":"Đây là điều đầu tiên của luật, xác định rõ phạm vi điều chỉnh của toàn bộ văn bản.","date":"2020-06-17","source":"Quốc hội khóa XIV"}]
+        },
+        {
+          "article_no": 2,
+          "article_heading": "Đối tượng áp dụng",
+          "article_text": "<p>1. Cơ quan nhà nước có thẩm quyền.</p><p>2. Nhà đầu tư trong nước, nhà đầu tư nước ngoài tham gia dự án đầu tư theo phương thức đối tác công tư tại Việt Nam.</p><p>3. Tổ chức, cá nhân khác có liên quan đến hoạt động đầu tư theo phương thức đối tác công tư.</p>",
+          "annotations": [{"type":"reference","text":"Liên quan đến Luật Đầu tư số 61/2020/QH14","source":"Văn bản pháp luật liên quan"}]
+        },
+        {
+          "article_no": 3,
+          "article_heading": "Giải thích từ ngữ",
+          "article_text": "",
+          "annotations": []
+        }
+      ]
+    },
+    {
+      "chapter_title": "Chính sách của Nhà nước về đầu tư theo phương thức đối tác công tư",
+      "chapter_seq": 2,
+      "branch_path": "chapter-2",
+      "articles": [
+        {
+          "article_no": 4,
+          "article_heading": "Chính sách của Nhà nước",
+          "article_text": "",
+          "annotations": []
+        },
+        {
+          "article_no": 5,
+          "article_heading": "Ưu đãi đầu tư",
+          "article_text": "",
+          "annotations": []
+        }
+      ]
+    }
+  ]
+}

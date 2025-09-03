@@ -1,0 +1,8 @@
+// Temporary fix lines:
+
+Line 110 should be:
+        console.log('Loading treeData:', treeData?.law_title, treeData?.chapters?.length);
+        setLawData(treeData);
+
+Line 133 should be:
+        setArticles([]);
