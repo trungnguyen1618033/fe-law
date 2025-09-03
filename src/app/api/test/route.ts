@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
         const comments = JSON.parse(fs.readFileSync(commentsPath, 'utf8'));
         return NextResponse.json({
           success: true,
-          comments: comments.filter(c => c.articleNo === data.articleNo)
+          comments: comments.filter((c: any) => c.articleNo === data.articleNo)
         });
       }
 

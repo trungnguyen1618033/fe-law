@@ -43,7 +43,7 @@ export function FontSizeProvider({
     if (stored && ['small', 'medium', 'large'].includes(stored)) {
       setFontSize(stored);
     }
-  }, []);
+  }, [storageKey]);
 
   useEffect(() => {
     if (!mounted) return;

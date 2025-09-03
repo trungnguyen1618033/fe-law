@@ -55,13 +55,13 @@ export default function SearchComponent({
   }, [lawId]);
 
   // Save search to history
-  const saveToHistory = (searchQuery: string) => {
+  const saveToHistory = useCallback((searchQuery: string) => {
     if (!searchQuery.trim()) return;
     
     const newHistory = [searchQuery, ...searchHistory.filter(item => item !== searchQuery)].slice(0, 10);
     setSearchHistory(newHistory);
     localStorage.setItem(`search_history_${lawId}`, JSON.stringify(newHistory));
-  };
+  }, [searchHistory, lawId]);
 
   // Calculate relevance score
   const calculateRelevance = useCallback((item: SearchIndex, searchTerm: string): number => {
@@ -150,10 +150,10 @@ export default function SearchComponent({
     } finally {
       setIsLoading(false);
     }
-  }, [searchIndex, allArticles, lawTree, calculateRelevance, sortBy, filterBy]);
+  }, [searchIndex, allArticles, lawTree, calculateRelevance, sortBy, filterBy, saveToHistory]);
 
   // Handle search
-  const handleSearch = (searchTerm: string, updateUrl: boolean = true) => {
+  const handleSearch = useCallback((searchTerm: string, updateUrl: boolean = true) => {
     setQuery(searchTerm);
     performSearch(searchTerm);
     
@@ -166,7 +166,7 @@ export default function SearchComponent({
       const newUrl = `/law/${lawId}/search${params.toString() ? '?' + params.toString() : ''}`;
       router.push(newUrl);
     }
-  };
+  }, [lawId, sortBy, filterBy, performSearch, router]);
 
   // Initial search
   useEffect(() => {
@@ -181,7 +181,7 @@ export default function SearchComponent({
       performSearch(query);
       handleSearch(query, true);
     }
-  }, [sortBy, filterBy]);
+  }, [sortBy, filterBy, query, performSearch, handleSearch]);
 
   const highlightText = (text: string, searchTerm: string): string => {
     if (!searchTerm) return text;
@@ -318,7 +318,7 @@ export default function SearchComponent({
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-400">Từ khóa:</span>
-                  <span className="font-medium text-gray-900 dark:text-gray-100">"{query}"</span>
+                  <span className="font-medium text-gray-900 dark:text-gray-100">&quot;{query}&quot;</span>
                 </div>
               </div>
             </div>
@@ -334,7 +334,7 @@ export default function SearchComponent({
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
                 Kết quả tìm kiếm
-                {query && <span className="text-primary-600 dark:text-primary-400 ml-2">"{query}"</span>}
+                {query && <span className="text-primary-600 dark:text-primary-400 ml-2">&quot;{query}&quot;</span>}
               </h2>
               {results.length > 0 && (
                 <span className="text-sm text-gray-600 dark:text-gray-400">
@@ -360,7 +360,7 @@ export default function SearchComponent({
                 Không tìm thấy kết quả
               </h3>
               <p className="text-gray-600 dark:text-gray-400 mb-4">
-                Không có kết quả nào cho từ khóa "{query}"
+                Không có kết quả nào cho từ khóa &quot;{query}&quot;
               </p>
               <div className="text-sm text-gray-500 dark:text-gray-500">
                 <p>Gợi ý:</p>

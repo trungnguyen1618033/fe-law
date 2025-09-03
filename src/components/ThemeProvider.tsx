@@ -37,7 +37,7 @@ export function ThemeProvider({
     if (stored) {
       setTheme(stored);
     }
-  }, []);
+  }, [storageKey]);
 
   useEffect(() => {
     if (!mounted) return;

@@ -5,20 +5,21 @@ import { LawService } from '@/lib/lawService';
 import SearchComponent from '@/components/SearchComponent';
 
 interface SearchPageProps {
-  params: {
+  params: Promise<{
     lawId: string;
-  };
-  searchParams: {
+  }>;
+  searchParams: Promise<{
     q?: string;
     filter?: string;
     sort?: string;
-  };
+  }>;
 }
 
 export async function generateMetadata({ params, searchParams }: SearchPageProps): Promise<Metadata> {
   const lawService = new LawService();
-  const lawId = decodeURIComponent(params.lawId);
-  const lawTree = await lawService.getLawTree(lawId);
+  const { lawId } = await params;
+  const decodedLawId = decodeURIComponent(lawId);
+  const lawTree = await lawService.getLawTree(decodedLawId);
   
   if (!lawTree) {
     return {
@@ -27,7 +28,8 @@ export async function generateMetadata({ params, searchParams }: SearchPageProps
     };
   }
 
-  const query = searchParams.q ? decodeURIComponent(searchParams.q) : '';
+  const searchParamsResolved = await searchParams;
+  const query = searchParamsResolved.q ? decodeURIComponent(searchParamsResolved.q) : '';
   
   return {
     title: query 
@@ -40,16 +42,18 @@ export async function generateMetadata({ params, searchParams }: SearchPageProps
 }
 
 export default async function SearchPage({ params, searchParams }: SearchPageProps) {
-  const lawId = decodeURIComponent(params.lawId);
-  const query = searchParams.q ? decodeURIComponent(searchParams.q) : '';
+  const { lawId } = await params;
+  const searchParamsResolved = await searchParams;
+  const decodedLawId = decodeURIComponent(lawId);
+  const query = searchParamsResolved.q ? decodeURIComponent(searchParamsResolved.q) : '';
   
   const lawService = new LawService();
   
   // Fetch law data in parallel
   const [lawTree, allArticles, searchIndex] = await Promise.all([
-    lawService.getLawTree(lawId),
-    lawService.getAllArticles(lawId),
-    lawService.searchArticles(lawId, query)
+    lawService.getLawTree(decodedLawId),
+    lawService.getAllArticles(decodedLawId),
+    lawService.searchArticles(decodedLawId, query)
   ]);
 
   if (!lawTree) {
@@ -111,9 +115,9 @@ export default async function SearchPage({ params, searchParams }: SearchPagePro
             lawTree={lawTree}
             allArticles={allArticles}
             searchIndex={searchIndex}
-            lawId={lawId}
+            lawId={decodedLawId}
             initialQuery={query}
-            searchParams={searchParams}
+            searchParams={searchParamsResolved}
           />
         </Suspense>
       </div>

@@ -3,15 +3,16 @@ import { LawService } from '@/lib/lawService';
 import Link from 'next/link';
 
 interface LawPageProps {
-  params: {
+  params: Promise<{
     lawId: string;
-  };
+  }>;
 }
 
 export async function generateMetadata({ params }: LawPageProps): Promise<Metadata> {
   const lawService = new LawService();
-  const lawId = decodeURIComponent(params.lawId);
-  const lawTree = await lawService.getLawTree(lawId);
+  const { lawId } = await params;
+  const decodedLawId = decodeURIComponent(lawId);
+  const lawTree = await lawService.getLawTree(decodedLawId);
   
   if (!lawTree) {
     return {
@@ -27,13 +28,14 @@ export async function generateMetadata({ params }: LawPageProps): Promise<Metada
 }
 
 export default async function LawPage({ params }: LawPageProps) {
-  console.log('LawPage - Received params:', params);
-  const lawId = decodeURIComponent(params.lawId);
-  console.log('LawPage - Decoded lawId:', lawId);
+  const { lawId } = await params;
+  console.log('LawPage - Received lawId:', lawId);
+  const decodedLawId = decodeURIComponent(lawId);
+  console.log('LawPage - Decoded lawId:', decodedLawId);
   
   const lawService = new LawService();
-  const lawTree = await lawService.getLawTree(lawId);
-  const allArticles = await lawService.getAllArticles(lawId);
+  const lawTree = await lawService.getLawTree(decodedLawId);
+  const allArticles = await lawService.getAllArticles(decodedLawId);
 
   if (!lawTree) {
     return (
@@ -43,7 +45,7 @@ export default async function LawPage({ params }: LawPageProps) {
             Không tìm thấy văn bản
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
-            Văn bản pháp luật với ID "{lawId}" không tồn tại.
+            Văn bản pháp luật với ID &quot;{decodedLawId}&quot; không tồn tại.
           </p>
         </div>
       </div>
@@ -60,7 +62,7 @@ export default async function LawPage({ params }: LawPageProps) {
                 {lawTree.law_title}
               </h1>
               <p className="text-gray-600 dark:text-gray-400 text-lg">
-                ID: {lawId}
+                ID: {decodedLawId}
               </p>
             </div>
 
@@ -87,7 +89,7 @@ export default async function LawPage({ params }: LawPageProps) {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Link
-                href={`/law/${lawId}/toc`}
+                href={`/law/${decodedLawId}/toc`}
                 className="flex items-center justify-center px-6 py-4 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
               >
                 <i className="fas fa-list mr-3"></i>
@@ -95,7 +97,7 @@ export default async function LawPage({ params }: LawPageProps) {
               </Link>
               
               <Link
-                href={`/law/${lawId}/all`}
+                href={`/law/${decodedLawId}/all`}
                 className="flex items-center justify-center px-6 py-4 border-2 border-primary-600 text-primary-600 dark:text-primary-400 rounded-lg hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors"
               >
                 <i className="fas fa-file-alt mr-3"></i>
@@ -103,7 +105,7 @@ export default async function LawPage({ params }: LawPageProps) {
               </Link>
               
               <Link
-                href={`/law/${lawId}/article/1`}
+                href={`/law/${decodedLawId}/article/1`}
                 className="flex items-center justify-center px-6 py-4 border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
               >
                 <i className="fas fa-play mr-3"></i>
@@ -128,7 +130,7 @@ export default async function LawPage({ params }: LawPageProps) {
                         </p>
                       </div>
                       <Link
-                        href={`/law/${lawId}/article/${chapter.articles[0]?.article_no || 1}`}
+                        href={`/law/${decodedLawId}/article/${chapter.articles[0]?.article_no || 1}`}
                         className="text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-200 text-sm font-medium"
                       >
                         Xem chi tiết →

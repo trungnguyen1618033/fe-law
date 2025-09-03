@@ -360,7 +360,7 @@ export default function DemoPage() {
                 
                 {expandedChapters.has(chapter.chapter_seq) && (
                   <div className="mt-2 pl-6 space-y-2 animate-in slide-in-from-top-2 duration-200">
-                    {chapter.articles.map((article, articleIndex: number) => (
+                    {chapter.articles.map((article: any, articleIndex: number) => (
                       <div key={`article-${chapter.chapter_seq}-${article.article_no}-${articleIndex}`} className="border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden">
                         <button
                           onClick={() => toggleArticle(article.article_no)}
@@ -666,16 +666,6 @@ export default function DemoPage() {
                                                   <i className="fas fa-edit text-green-600 dark:text-green-400 mr-2"></i>
                                                   Sửa đổi & Bổ sung ({amendments.length})
                                                 </h5>
-                                                <button
-                                                  onClick={() => {
-                                                    setNewAnnotation({ ...newAnnotation, type: 'amendment' });
-                                                    setShowAnnotationForm(showAnnotationForm === fullArticle.article_no ? null : fullArticle.article_no);
-                                                  }}
-                                                  className="px-2 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
-                                                >
-                                                  <i className="fas fa-plus mr-1"></i>
-                                                  Thêm sửa đổi
-                                                </button>
                                               </div>
                                               
                                               <div className="space-y-2">

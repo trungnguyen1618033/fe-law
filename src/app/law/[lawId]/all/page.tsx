@@ -4,15 +4,16 @@ import { LawService } from '@/lib/lawService';
 import AllArticlesComponent from '@/components/AllArticlesComponent';
 
 interface AllArticlesPageProps {
-  params: {
+  params: Promise<{
     lawId: string;
-  };
+  }>;
 }
 
 export async function generateMetadata({ params }: AllArticlesPageProps): Promise<Metadata> {
   const lawService = new LawService();
-  const lawId = decodeURIComponent(params.lawId);
-  const lawTree = await lawService.getLawTree(lawId);
+  const { lawId } = await params;
+  const decodedLawId = decodeURIComponent(lawId);
+  const lawTree = await lawService.getLawTree(decodedLawId);
   
   if (!lawTree) {
     return {
@@ -28,19 +29,19 @@ export async function generateMetadata({ params }: AllArticlesPageProps): Promis
 }
 
 export default async function AllArticlesPage({ params }: AllArticlesPageProps) {
-  console.log('AllArticlesPage - Received params:', params);
-  console.log('AllArticlesPage - lawId type:', typeof params.lawId, params.lawId);
+  const { lawId } = await params;
+  console.log('AllArticlesPage - Received lawId:', lawId);
   
   // Decode URL parameters in case they're encoded
-  const lawId = decodeURIComponent(params.lawId);
-  console.log('AllArticlesPage - Decoded lawId:', lawId);
+  const decodedLawId = decodeURIComponent(lawId);
+  console.log('AllArticlesPage - Decoded lawId:', decodedLawId);
   
   const lawService = new LawService();
   
   // Fetch law tree and all articles in parallel
   const [lawTree, allArticles] = await Promise.all([
-    lawService.getLawTree(lawId),
-    lawService.getAllArticles(lawId)
+    lawService.getLawTree(decodedLawId),
+    lawService.getAllArticles(decodedLawId)
   ]);
 
   if (!lawTree || !allArticles || allArticles.length === 0) {
@@ -64,14 +65,14 @@ export default async function AllArticlesPage({ params }: AllArticlesPageProps) 
               </div>
               <div className="flex items-center space-x-3">
                 <a 
-                  href={`/law/${params.lawId}/toc`}
+                  href={`/law/${decodedLawId}/toc`}
                   className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
                 >
                   <i className="fas fa-list mr-2"></i>
                   Mục lục
                 </a>
                 <a 
-                  href={`/law/${params.lawId}`}
+                  href={`/law/${lawId}`}
                   className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
                 >
                   <i className="fas fa-arrow-left mr-2"></i>
@@ -89,7 +90,7 @@ export default async function AllArticlesPage({ params }: AllArticlesPageProps) 
         <AllArticlesComponent 
           lawTree={lawTree}
           allArticles={allArticles}
-          lawId={lawId}
+          lawId={decodedLawId}
         />
       </div>
     </div>

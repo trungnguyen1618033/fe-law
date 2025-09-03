@@ -412,7 +412,7 @@ export default function DemoModernPage() {
                     
                     {expandedChapters.has(chapter.chapter_seq) && (
                       <div className="mt-3 pl-6 space-y-2 animate-in slide-in-from-top-2 duration-200">
-                        {chapter.articles.map((article, articleIndex: number) => (
+                        {chapter.articles.map((article: any, articleIndex: number) => (
                           <div key={`article-${chapter.chapter_seq}-${article.article_no}-${articleIndex}`} className="border border-gray-200 dark:border-gray-600 rounded-lg overflow-hidden shadow-sm">
                             <button
                               onClick={() => toggleArticle(article.article_no)}
