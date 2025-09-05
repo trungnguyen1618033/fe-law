@@ -73,6 +73,45 @@ const commentTypes = [
   { value: 'important', label: '⭐ Quan trọng', color: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-200' }
 ];
 
+// Function to process and group articles into chapters properly
+const processChapters = (articlesArray: any[]) => {
+  // Group articles by chapter
+  const chapterMap = new Map();
+  
+  articlesArray.forEach(article => {
+    const chapterKey = `${article.chapter_seq}-${article.chapter_title || 'Không có tên'}`;
+    
+    if (!chapterMap.has(chapterKey)) {
+      chapterMap.set(chapterKey, {
+        chapter_seq: article.chapter_seq,
+        chapter_title: article.chapter_title || (article.chapter_seq === 0 ? 'Không phân chương' : `Chương ${article.chapter_seq}`),
+        articles: []
+      });
+    }
+    
+    // Add article to chapter
+    chapterMap.get(chapterKey).articles.push({
+      article_no: article.article_no,
+      article_heading: article.article_heading,
+      article_text: article.article_text,
+      article_html: article.article_html,
+      annotations: article.annotations || []
+    });
+  });
+  
+  // Convert to array and sort by chapter_seq
+  const chaptersArray = Array.from(chapterMap.values()).sort((a, b) => a.chapter_seq - b.chapter_seq);
+  
+  // Sort articles within each chapter by article_no
+  chaptersArray.forEach(chapter => {
+    chapter.articles.sort((a, b) => a.article_no - b.article_no);
+  });
+  
+  console.log('Processed chapters:', chaptersArray.length, 'Total articles:', articlesArray.length);
+  
+  return chaptersArray;
+};
+
 export default function InteractivePage() {
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
@@ -88,6 +127,7 @@ export default function InteractivePage() {
   const [lawData, setLawData] = useState<LawData | null>(null);
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
+  const [collapsedChapters, setCollapsedChapters] = useState<Set<string>>(new Set());
 
   // Load data from files
   useEffect(() => {
@@ -100,13 +140,21 @@ export default function InteractivePage() {
 
         const treeData = await treeResponse.json();
         console.log('Loading treeData:', treeData?.law_title, treeData?.chapters?.length);
-        setLawData(treeData);
 
         const articlesText = await articlesResponse.text();
         const articlesArray = articlesText
           .trim()
           .split('\n')
           .map(line => JSON.parse(line));
+        
+        // Process and reorganize chapters to group articles properly
+        const processedChapters = processChapters(articlesArray);
+        const processedLawData = {
+          ...treeData,
+          chapters: processedChapters
+        };
+        
+        setLawData(processedLawData);
         setArticles(articlesArray);
 
         // Set first article as selected
@@ -292,6 +340,17 @@ export default function InteractivePage() {
   // Get comments for current article
   const articleComments = selectedArticle ? comments.filter(c => c.articleNo === selectedArticle.article_no) : [];
 
+  // Toggle chapter collapse
+  const toggleChapterCollapse = (chapterKey: string) => {
+    const newCollapsed = new Set(collapsedChapters);
+    if (newCollapsed.has(chapterKey)) {
+      newCollapsed.delete(chapterKey);
+    } else {
+      newCollapsed.add(chapterKey);
+    }
+    setCollapsedChapters(newCollapsed);
+  };
+
   // Get comment type info
   const getCommentTypeInfo = (type: string) => {
     return commentTypes.find(t => t.value === type);
@@ -449,22 +508,33 @@ export default function InteractivePage() {
               </div>
 
               {/* Chapters */}
-              <div className="max-h-96 overflow-y-auto">
-                {lawData?.chapters.map((chapter, chapterIndex: number) => (
-                  <div key={`chapter-${chapter.chapter_seq}-${chapterIndex}`} className="border-b border-gray-200 dark:border-gray-700 last:border-b-0">
-                    <div className="px-4 py-3 bg-gray-50 dark:bg-gray-700">
-                      <div className="flex items-center justify-between">
-                        <h4 className="font-medium text-gray-900 dark:text-gray-100">
-                          Chương {chapter.chapter_seq}: {chapter.chapter_title}
-                        </h4>
-                        <span className="text-xs bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 px-2 py-1 rounded-full">
-                          {chapter.articles.length} điều
-                        </span>
-                      </div>
-                    </div>
-                    
-                    {/* Articles */}
-                    <div className="bg-gray-50 dark:bg-gray-700/50">
+              <div className="max-h-[80vh] overflow-y-auto">
+                {lawData?.chapters.map((chapter, chapterIndex: number) => {
+                  const chapterKey = `${chapter.chapter_seq}-${chapterIndex}`;
+                  const isCollapsed = collapsedChapters.has(chapterKey);
+                  
+                  return (
+                    <div key={`chapter-${chapter.chapter_seq}-${chapterIndex}`} className="border-b border-gray-200 dark:border-gray-700 last:border-b-0">
+                      <button
+                        onClick={() => toggleChapterCollapse(chapterKey)}
+                        className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center">
+                            <i className={`fas ${isCollapsed ? 'fa-chevron-right' : 'fa-chevron-down'} mr-2 text-sm text-gray-500`}></i>
+                            <h4 className="font-medium text-gray-900 dark:text-gray-100 text-left">
+                              Chương {chapter.chapter_seq}: {chapter.chapter_title}
+                            </h4>
+                          </div>
+                          <span className="text-xs bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 px-2 py-1 rounded-full">
+                            {chapter.articles.length} điều
+                          </span>
+                        </div>
+                      </button>
+                      
+                      {/* Articles - Show/Hide based on collapse state */}
+                      {!isCollapsed && (
+                        <div className="bg-gray-50 dark:bg-gray-700/50">
                       {chapter.articles.map((article: any, articleIndex: number) => {
                         const isSelected = selectedArticle?.article_no === article.article_no;
                         const articleCommentsCount = comments.filter(c => c.articleNo === article.article_no).length;
@@ -500,9 +570,11 @@ export default function InteractivePage() {
                           </button>
                         );
                       })}
+                        </div>
+                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           </div>
